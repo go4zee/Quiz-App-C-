@@ -1,0 +1,51 @@
+﻿
+
+#logo {
+    height: 40px;
+}
+
+.content{
+    background: #ffffff center center no-repeat;
+    background-size: cover;
+    opacity:1;
+    height: 100%;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+
+#footer-main, #footer-main a {
+    background:#373A3C;
+    color:#FFFFFF;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.modal-backdrop {
+    position: relative;
+    display:none;
+
+    /* ... */
+}
+
+.modal {
+    z-index: 1041;
+}
+
+.navbar {
+    z-index: 1040;
+}
+
+.container-fluid {
+    padding: 0px 5px 0px 5px;
+}
+
+#editButton{
+    margin: 0px 10px 0px 30px;
+}
+
+#deleteButton{
+}
+
+.badge{
+    float: right;
+    position: relative;
+}
