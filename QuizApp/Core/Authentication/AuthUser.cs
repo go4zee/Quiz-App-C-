@@ -70,6 +70,7 @@ namespace QuizApp.Core.Authentication
                     {
                         au.UserType = (AuthUser.AuthUserUserType)Enum.Parse(typeof(AuthUser.AuthUserUserType), u.UserAccessLevel.ToString());
                         Session["UserType"] = au.UserType;
+                        Session["UserID"] = u.UserID;
                         au.DisplayName = u.UserFirstName;
                     }
                     catch
@@ -154,57 +155,7 @@ namespace QuizApp.Core.Authentication
         }
 
 
-        public static class CookieProtectionHelperWrapper
-        {
-
-            private static MethodInfo _encode;
-            private static MethodInfo _decode;
-
-            static CookieProtectionHelperWrapper()
-            {
-                // obtaining a reference to System.Web assembly
-                Assembly systemWeb = typeof(HttpContext).Assembly;
-                if (systemWeb == null)
-                {
-                    throw new InvalidOperationException(
-                        "Unable to load System.Web.");
-                }
-                // obtaining a reference to the internal class CookieProtectionHelper
-                Type cookieProtectionHelper = systemWeb.GetType(
-                        "System.Web.Security.CookieProtectionHelper");
-                if (cookieProtectionHelper == null)
-                {
-                    throw new InvalidOperationException(
-                        "Unable to get the internal class CookieProtectionHelper.");
-                }
-                // obtaining references to the methods of CookieProtectionHelper class
-                _encode = cookieProtectionHelper.GetMethod(
-                        "Encode", BindingFlags.NonPublic | BindingFlags.Static);
-                _decode = cookieProtectionHelper.GetMethod(
-                        "Decode", BindingFlags.NonPublic | BindingFlags.Static);
-
-                if (_encode == null || _decode == null)
-                {
-                    throw new InvalidOperationException(
-                        "Unable to get the methods to invoke.");
-                }
-            }
-
-            public static string Encode(CookieProtection cookieProtection,
-                                        byte[] buf, int count)
-            {
-                return (string)_encode.Invoke(null,
-                        new object[] { cookieProtection, buf, count });
-            }
-
-            public static byte[] Decode(CookieProtection cookieProtection,
-                                        string data)
-            {
-                return (byte[])_decode.Invoke(null,
-                        new object[] { cookieProtection, data });
-            }
-
-        }
+       
 
     }
 }

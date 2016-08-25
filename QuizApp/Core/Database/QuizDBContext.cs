@@ -6,11 +6,14 @@ using System.Configuration;
 
 namespace QuizApp.Core.Database
 {
-    public class QuizDBContext
+    public static class QuizDBContext
     {
 
+        public static string QuizConnectionString()
+        {
+            return ConfigurationManager.ConnectionStrings["QuizConnectionString"].ConnectionString;
+        }
 
-        public string QuizConnectionString = ConfigurationManager.ConnectionStrings["QuizConnectionString"].ConnectionString;
 
 
     }

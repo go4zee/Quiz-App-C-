@@ -42,7 +42,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <asp:Button ID="btnCreate" runat="server" CssClass="btn btn-primary" OnClick="createNewQuiz" OnClientClick="return validateQuizName();" Text="Create Quiz"></asp:Button>
+                    <asp:Button ID="btnCreate" runat="server" CssClass="btn btn-primary" OnClick="CreateNewQuiz" OnClientClick="return validateQuizName();" Text="Create Quiz"></asp:Button>
                 </div>
             </div>
         </div>

@@ -24,11 +24,10 @@ namespace QuizApp
         public void InitializeQuizList()
         {
 
-            QuizDBContext db = new QuizDBContext();
-            string QueryString = @"Select QuizName FROM QuizList";
+            string QueryString = @"Select QuizName, QuizID FROM QuizList";
 
             DataTable datatable = new DataTable();
-            datatable = QueryExecute(QueryString, db.QuizConnectionString);
+            datatable = QueryExecute(QueryString, QuizDBContext.QuizConnectionString() );
 
             if (datatable != null)
             {
@@ -43,7 +42,8 @@ namespace QuizApp
                         HtmlButton editButton = new HtmlButton();
                         editButton.InnerText = "Edit";
                         editButton.Attributes["class"] = "btn btn-primary";
-                        editButton.Attributes["value"] = SecurityClass.EncryptString(dr["QuizName"].ToString(), "ButtonType");
+                        editButton.Attributes["value"] = SecurityClass.EncryptString(dr["QuizName"].ToString(), "TableNamePhrase");
+                        editButton.Attributes["quizid"] = SecurityClass.EncryptString(dr["QuizID"].ToString(), "QuizID");
                         editButton.Attributes["action"] = SecurityClass.EncryptString("Edit", "ActionPhrase");
                         editButton.Attributes["runat"] = "server";
                         editButton.ServerClick += EditQuiz;
@@ -53,9 +53,11 @@ namespace QuizApp
                         HtmlButton DeleteButton = new HtmlButton();
                         DeleteButton.InnerText = "Delete";
                         DeleteButton.Attributes["class"] = "btn btn-danger";
-                        DeleteButton.Attributes["value"] = SecurityClass.EncryptString(dr["QuizName"].ToString(), "ButtonTypePhrase");
+                        DeleteButton.Attributes["value"] = SecurityClass.EncryptString(dr["QuizName"].ToString(), "TableNamePhrase");
                         DeleteButton.Attributes["action"] = SecurityClass.EncryptString("Delete", "ActionPhrase");
+                        DeleteButton.Attributes["quizid"] = SecurityClass.EncryptString(dr["QuizID"].ToString(), "QuizID");
                         DeleteButton.Attributes["runat"] = "server";
+                        DeleteButton.ServerClick += DeleteQuiz;
                         DeleteButton.Attributes["id"] = "deleteButton";
 
                         QuizListDiv.Controls.Add(li);
@@ -69,6 +71,32 @@ namespace QuizApp
 
 
         }
+
+        protected void CreateNewQuiz(object sender, EventArgs e)
+        {
+            if(QuizNameTextBox.Text != "")
+            {
+                Session["TableName"] = SecurityClass.EncryptString(QuizNameTextBox.Text, "TableNamePhrase");
+                Session["Action"] = SecurityClass.EncryptString("Create", "ActionPhrase");
+
+                Response.Redirect("QuizSetup.aspx");
+            }
+        }
+
+        private void DeleteQuiz(object sender, EventArgs e)
+        {
+            HtmlButton button = (HtmlButton)sender;
+            string parameterTableName = button.Attributes["value"];
+            string parameterAction = button.Attributes["action"];
+            string parameterQuizID = button.Attributes["quizid"];
+
+            Session["TableName"] = parameterTableName;
+            Session["Action"] = parameterAction;
+            Session["QuizID"] = parameterQuizID;
+
+            Response.Redirect("QuizSetup.aspx");
+        }
+
         public DataTable QueryExecute(string QueryString, string Connection)
         {
             DataTable retVal = new DataTable();
@@ -92,12 +120,17 @@ namespace QuizApp
 
         protected void EditQuiz(object sender, EventArgs e)
         {
+            HtmlButton button = (HtmlButton)sender;
+            string parameterTableName = button.Attributes["value"];
+            string parameterAction = button.Attributes["action"];
+            string parameterQuizID = button.Attributes["quizid"];
+
+            Session["TableName"] = parameterTableName;
+            Session["Action"] = parameterAction;
+            Session["QuizID"] = parameterQuizID;
+
             Response.Redirect("QuizSetup.aspx");
         }
 
-        protected void createNewQuiz(object sender, EventArgs e)
-        {
-
-        }
     }
 }

@@ -145,6 +145,7 @@
     <Content Include="scripts\jquery-2.2.3.min.map" />
     <None Include="scripts\_references.js" />
     <Content Include="style\style.css" />
+    <Content Include="testpage.aspx" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -205,6 +206,13 @@
     </Compile>
     <Compile Include="QuizSetup.aspx.designer.cs">
       <DependentUpon>QuizSetup.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="testpage.aspx.cs">
+      <DependentUpon>testpage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="testpage.aspx.designer.cs">
+      <DependentUpon>testpage.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
