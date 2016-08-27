@@ -555,7 +555,7 @@ namespace QuizApp
                     {
                         if (txtanswer4.Value != "")
                         {
-                            checkCount++;
+                            checkCount++; 
                             answerArray.Add(4);
                         }
                         else
