@@ -23,11 +23,11 @@ namespace QuizApp
         Guid quizID;
         protected void Page_Load(object sender, EventArgs e)
         {
+
             //Remove after final implementation
             Session["UserID"] = "62839730-9bf4-4724-b1ae-1759e0f21b20";
 
             InitializeQuizSetup();
-            Session["display"] = "hidden";
 
             testLabel.Text = tableName + "____" + action + "____" + quizid;
 
@@ -79,7 +79,7 @@ namespace QuizApp
             }
         }
 
-
+        #region ADD, EDIT and DELETE Table
 
         /// <summary>
         /// creates table with the specified table name in the Quiz Database and adds a entry into the QuizList Table
@@ -98,9 +98,9 @@ namespace QuizApp
                     NonQueryExecute(QuizListQueryString, ConnectionString, "CreateList");
                     NonQueryExecute(QuizNameQueryString, ConnectionString, "CreateTable");
                 }
-                catch
+                catch(Exception e)
                 {
-                    testLabel.Text = "Error";
+                    testLabel.Text = e.ToString();
                 }
             }
             else
@@ -110,6 +110,10 @@ namespace QuizApp
 
         }
 
+        /// <summary>
+        /// On Page load Queries the "TableName" table and populates the side bar with the list of questions.
+        /// </summary>
+        /// <param name="TableName"></param>
         protected void EditTable(string TableName)
         {
             string QueryString = @"Select * FROM " + TableName;
@@ -126,17 +130,66 @@ namespace QuizApp
                         LinkButton li = new LinkButton();
                         li.Text = dr["QuizTableQuizQuestion"].ToString();
                         li.Attributes["class"] = "list-group-item";
-                        li.Attributes["rowid"] = dr["QuizTableQuestionNumber"].ToString();
+                        li.Attributes["qnumber"] = dr["QuizTableQuestionNumber"].ToString();
+                        li.CommandArgument = dr["QuizTableQuestionNumber"].ToString();
+                        li.Attributes["runat"] = "server";
+                        li.Click += new System.EventHandler(QuizSideBarLinkButton_Click);
+
+                        HtmlGenericControl questionDiv = new HtmlGenericControl("div");
+                        
+                        HtmlButton DeleteButton = new HtmlButton();
+                        DeleteButton.InnerText = "Delete";
+                        DeleteButton.Attributes["class"] = "btn btn-danger btn-xs";
+                        DeleteButton.Attributes["runat"] = "server";
+                        DeleteButton.ServerClick += DeleteQuestion;
+                        DeleteButton.Attributes["qnumber"] = dr["QuizTableQuestionNumber"].ToString();
+                        //li.Attributes["onclientclick"] = "LinkButton_Click()";
 
 
-
-                        quizQuestionListBar.Controls.Add(li);
+                        questionDiv.Controls.Add(li);
+                        quizQuestionListBar.Controls.Add(questionDiv);
+                        questionDiv.Controls.Add(DeleteButton);
+                        
                     }
                 }
             }
 
 
         }
+
+        private void DeleteQuestion(object sender, EventArgs e)
+        {
+            HtmlButton DeleteButton = (HtmlButton)sender;
+            
+            if(DeleteButton.Attributes["qnumber"].ToString() != "")
+            {
+                int rowNumber = Convert.ToInt16(DeleteButton.Attributes["qnumber"].ToString());
+                using (SqlConnection SqlConnection1 = new SqlConnection(QuizDBContext.QuizConnectionString()))
+                {
+                    try
+                    {
+                        SqlDataAdapter adapter = new SqlDataAdapter();
+                        string DeleteQueryString = string.Format("DELETE FROM {0} WHERE QuizTableQuestionNumber = @qnumber", tableName);
+                        SqlCommand UpdateCommand = new SqlCommand(DeleteQueryString, SqlConnection1);
+                        UpdateCommand.Parameters.AddWithValue("@qnumber", rowNumber);
+                        SqlConnection1.Open();
+                        adapter.DeleteCommand = UpdateCommand;
+
+                        UpdateCommand.ExecuteNonQuery();
+                        InitializeQuizSetup();
+                    }
+                    catch(Exception error)
+                    {
+                        string errorString = error.ToString();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deletes the Quiz and removes the list item from the QuizList table tableName=TableName
+        /// </summary>
+        /// <param name="TableName"></param>
         protected void DeleteTable(string TableName)
         {
             string ConnectionString = QuizDBContext.QuizConnectionString();
@@ -161,33 +214,150 @@ namespace QuizApp
             }
         }
 
+        #endregion
+
+        #region HTML Add and Load Elements
         protected void btnAddNewQuestion_Click(object sender, EventArgs e)
         {
-            AddQuestion("CreateQuestion");
-        }
-
-        protected void AddQuestion(string QuestionAction)
-        {
-            if (QuestionAction == "CreateQuestion")
-            {
-                AddHTMLElements(false);
-            }
+            AddHTMLElements(true, null);
         }
 
         /// <summary>
-        /// if iscurrent is true then the DB is called and popoultes the options, else just adds the default structure of DOM Elements
+        /// is called when an existing question is clicked and sets the check box to checked or unchecked based on the answer list
         /// </summary>
-        /// <param name="isCurrent"></param>
-        private void AddHTMLElements(bool isCurrent)
+        /// <param name="Answer"></param>
+        /// <returns></returns>
+        protected void SetCheckBoxFromAnswerString(string Answer)
         {
-            if (!isCurrent)
-            {
-                Session["display"] = "block";
-                quizEditWindowContainer.Attributes.Add("style", "display:block");
+            List<int> answerList = new List<int>();
+            string[] seperators = { "," };
+            string[] answerString = Answer.Split(seperators, StringSplitOptions.RemoveEmptyEntries);
 
+            foreach (string s in answerString)
+            {
+                answerList.Add(Convert.ToInt32(s));
+            }
+            foreach (int n in answerList)
+            {
+                switch (n)
+                {
+                    case 1: checkbox1.Checked = true; break;
+                    case 2: checkbox2.Checked = true; break;
+                    case 3: checkbox3.Checked = true; break;
+                    case 4: checkbox4.Checked = true; break;
+                    case 5: checkbox5.Checked = true; break;
+                    case 6: checkbox6.Checked = true; break;
+                }
+            }
+
+        }
+
+        /// <summary>
+        /// if isNewQuestion is false then the DB is called and popoultes the options, else just adds the default structure of DOM Elements
+        /// 
+        /// </summary>
+        /// <param name="isNewQuestion"></param>
+        private void AddHTMLElements(bool isNewQuestion, DataTable dataTable)
+        {
+            Session["display"] = "block";
+            quizEditWindowContainer.Attributes.Add("style", "display:block");
+
+            if (!isNewQuestion && dataTable.Rows.Count > 0)
+            {
+                SetCheckBoxFromAnswerString(dataTable.Rows[0].Field<string>("QuizTableAnswer"));
+
+                txtQuestion.InnerText = dataTable.Rows[0].Field<string>("QuizTableQuizQuestion");
+                txtanswer1.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer1");
+                txtanswer2.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer2");
+                txtanswer3.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer3");
+                txtanswer4.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer4");
+                txtanswer5.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer5");
+                txtanswer6.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer6");
+
+                btnAddQuestionToDB.Text = "Update";
+                Session["update"] = "true";
+            }
+            else
+            {
+                Session["update"] = "false";
+                Session["qnumber"] = "";
+
+                checkbox1.Checked = false;
+                checkbox2.Checked = false;
+                checkbox3.Checked = false;
+                checkbox4.Checked = false;
+                checkbox5.Checked = false;
+                checkbox6.Checked = false;
+
+                txtQuestion.InnerText = "";
+                txtanswer1.Value = "";
+                txtanswer2.Value = "";
+                txtanswer3.Value = "";
+                txtanswer4.Value = "";
+                txtanswer5.Value = "";
+                txtanswer6.Value = "";
+                btnAddQuestionToDB.Text = "Add";
             }
         }
 
+        #endregion
+
+
+        #region SideBar Handles the side bar click events
+        /// <summary>
+        /// Click event when any question is clicked in EditMode from the sidebar of the QuizSetup.aspx page
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        protected void QuizSideBarLinkButton_Click(object sender, EventArgs e)
+        {
+            //Response.Redirect("testpage.aspx");
+            LinkButton li = (LinkButton)sender;
+            string parameterTableRowID = li.Attributes["qnumber"].ToString();
+
+            if (parameterTableRowID != "")
+            {
+                DataSet dataset = new DataSet();
+                using (SqlConnection SqlConnection1 = new SqlConnection(QuizDBContext.QuizConnectionString()))
+                {
+                    try
+                    {
+                        DataTable dataTable = new DataTable();
+                        SqlDataAdapter adapter = new SqlDataAdapter();
+                        string QueryString = string.Format("SELECT * FROM {0} WHERE QuizTableQuestionNumber = @qnumber", tableName);
+                        SqlCommand Command = new SqlCommand(QueryString, SqlConnection1);
+                        Command.Parameters.AddWithValue("@qnumber", parameterTableRowID);
+                        SqlConnection1.Open();
+                        adapter.SelectCommand = Command;
+
+                        adapter.Fill(dataset, tableName);
+                        dataTable = dataset.Tables[tableName];
+                        SqlConnection1.Close();
+
+                        if (dataTable.Rows.Count > 0)
+                        {
+                            AddHTMLElements(false, dataTable);
+                            Session["qnumber"] = parameterTableRowID;
+
+
+                        }
+
+                    }
+                    catch (Exception error)
+                    {
+                        string errorString = error.ToString();
+                    }
+                }
+
+            }
+            else
+            {
+                Response.Redirect("QuizSetup.aspx");
+            }
+
+
+        }
+        #endregion
 
         protected void ChooseAction(string Action, string TableName)
         {
@@ -207,6 +377,7 @@ namespace QuizApp
             }
         }
 
+        #region Query and Non-Query Execute
         public DataTable QueryExecute(string QueryString, string Connection)
         {
             DataTable retVal = new DataTable();
@@ -249,9 +420,9 @@ namespace QuizApp
                                 Command.ExecuteNonQuery();
                                 Command.Connection.Close();
                             }
-                            catch
+                            catch (Exception error)
                             {
-                                string s = "";
+                                string errorString = error.ToString();
                             }
                         }
                         break;
@@ -272,9 +443,9 @@ namespace QuizApp
                                 Command.ExecuteNonQuery();
                                 Command.Connection.Close();
                             }
-                            catch
+                            catch (Exception error)
                             {
-                                string s = "";
+                                string errorString = error.ToString();
                             }
                         }
 
@@ -289,9 +460,9 @@ namespace QuizApp
                                 Command.ExecuteNonQuery();
                                 Command.Connection.Close();
                             }
-                            catch
+                            catch (Exception error)
                             {
-                                string s = "";
+                                string errorString = error.ToString();
                             }
                         }
                         break;
@@ -302,14 +473,12 @@ namespace QuizApp
             }
 
         }
+        #endregion
 
-        protected void FillElementsFromDB(object sender, EventArgs e)
-        {
-
-        }
 
         protected void btnQuestionCancel_Click(object sender, EventArgs e)
         {
+
             Response.Redirect("QuizSetup.aspx");
         }
 
@@ -318,7 +487,7 @@ namespace QuizApp
             //css value for bootstrap alert type danger
             string alertTypeDanger = "alert alert-danger";
             //Checks the set session variable for extra security if the display property of questionWindow is modified on runtime and prevents attacks
-            if (Session["display"].ToString() != "block")
+            if (Session["display"].ToString() == "block")
             {
                 if (txtQuestion.InnerText == "")
                 {
@@ -346,34 +515,77 @@ namespace QuizApp
 
                     if (checkbox1.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(1);
+                        if (txtanswer1.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(1);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
+
                     }
 
                     if (checkbox2.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(2);
+                        if (txtanswer2.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(2);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
                     }
                     if (checkbox3.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(3);
+                        if (txtanswer3.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(3);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
                     }
                     if (checkbox4.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(4);
+                        if (txtanswer4.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(4);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
                     }
                     if (checkbox5.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(5);
+                        if (txtanswer5.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(5);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
                     }
                     if (checkbox6.Checked == true)
                     {
-                        checkCount++;
-                        answerArray.Add(6);
+                        if (txtanswer6.Value != "")
+                        {
+                            checkCount++;
+                            answerArray.Add(6);
+                        }
+                        else
+                        {
+                            SetMessage("Answer cannot be empty", alertTypeDanger);
+                        }
                     }
 
                     if (answerCount > 1)
@@ -382,30 +594,61 @@ namespace QuizApp
                         {
                             SetMessage("Success", "alert alert-success");
                             string answerList = string.Join(",", answerArray);
-                            //string QueryString = string.Format("SET IDENTITY_INSERT {0} ON;", tableName);
-                            string QueryString = string.Format("INSERT INTO {0} ", tableName);
-                            QueryString += "(QuizTableQuizID, QuizTableQuizName, QuizTableQuizQuestion, QuizTableQuizAnswer1, QuizTableQuizAnswer2, QuizTableQuizAnswer3, QuizTableQuizAnswer4, QuizTableQuizAnswer5, QuizTableQuizAnswer6, QuizTableAnswer) ";
-                            QueryString += "VALUES (@QuizID, @QuizName, @QuizQuestion, @Answer1, @Answer2, @Answer3, @Answer4, @Answer5, @Answer6,@Answer)";
-                            //QueryString += string.Format("SET IDENTITY_INSERT {0} OFF; ", tableName);
-                            //NonQueryExecute(QueryString, QuizDBContext.QuizConnectionString(), "AddQuestion");
+
+                            string InsertQueryString = string.Format("INSERT INTO {0} ", tableName);
+                            InsertQueryString += "(QuizTableQuizID, QuizTableQuizName, QuizTableQuizQuestion, QuizTableQuizAnswer1, QuizTableQuizAnswer2, QuizTableQuizAnswer3, QuizTableQuizAnswer4, QuizTableQuizAnswer5, QuizTableQuizAnswer6, QuizTableAnswer) ";
+                            InsertQueryString += "VALUES (@QuizID, @QuizName, @QuizQuestion, @Answer1, @Answer2, @Answer3, @Answer4, @Answer5, @Answer6,@Answer)";
+
+                            string UpdateQueryString = string.Format("UPDATE {0} ", tableName);
+                            UpdateQueryString += " SET QuizTableQuizID=@QuizID, QuizTableQuizName= @QuizName, QuizTableQuizQuestion=@QuizQuestion, QuizTableQuizAnswer1=@Answer1, QuizTableQuizAnswer2=@Answer2, QuizTableQuizAnswer3=@Answer3, QuizTableQuizAnswer4=@Answer4, QuizTableQuizAnswer5=@Answer5, QuizTableQuizAnswer6=@Answer6, QuizTableAnswer=@Answer ";
+                            UpdateQueryString += " WHERE QuizTableQuestionNumber=@qnumber";
+
+
                             using (SqlConnection SqlConnection1 = new SqlConnection(QuizDBContext.QuizConnectionString()))
                             {
                                 try
                                 {
-                                    SqlCommand Command = new SqlCommand(QueryString, SqlConnection1);
-                                    Command.Parameters.AddWithValue("QuizID", quizid);
-                                    Command.Parameters.AddWithValue("QuizName", tableName);
-                                    Command.Parameters.AddWithValue("QuizQuestion", txtQuestion.Value);
-                                    Command.Parameters.AddWithValue("Answer1", txtanswer1.Value);
-                                    Command.Parameters.AddWithValue("Answer2", txtanswer2.Value);
-                                    Command.Parameters.AddWithValue("Answer3", txtanswer3.Value);
-                                    Command.Parameters.AddWithValue("Answer4", txtanswer4.Value);
-                                    Command.Parameters.AddWithValue("Answer5", txtanswer5.Value);
-                                    Command.Parameters.AddWithValue("Answer6", txtanswer6.Value);
-                                    Command.Parameters.AddWithValue("Answer", answerList);
-                                    Command.Connection.Open();
-                                    Command.ExecuteNonQuery();
-                                    Command.Connection.Close();
+                                    SqlDataAdapter adapter = new SqlDataAdapter();
+
+                                    SqlCommand InsertCommand = new SqlCommand(InsertQueryString, SqlConnection1);
+                                    InsertCommand.Parameters.AddWithValue("QuizID", quizid);
+                                    InsertCommand.Parameters.AddWithValue("QuizName", tableName);
+                                    InsertCommand.Parameters.AddWithValue("QuizQuestion", txtQuestion.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer1", txtanswer1.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer2", txtanswer2.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer3", txtanswer3.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer4", txtanswer4.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer5", txtanswer5.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer6", txtanswer6.Value);
+                                    InsertCommand.Parameters.AddWithValue("Answer", answerList);
+
+                                    SqlCommand UpdateCommand = new SqlCommand(UpdateQueryString, SqlConnection1);
+                                    UpdateCommand.Parameters.AddWithValue("QuizID", quizid);
+                                    UpdateCommand.Parameters.AddWithValue("QuizName", tableName);
+                                    UpdateCommand.Parameters.AddWithValue("QuizQuestion", txtQuestion.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer1", txtanswer1.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer2", txtanswer2.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer3", txtanswer3.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer4", txtanswer4.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer5", txtanswer5.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer6", txtanswer6.Value);
+                                    UpdateCommand.Parameters.AddWithValue("Answer", answerList);
+                                    UpdateCommand.Parameters.AddWithValue("qnumber", Session["qnumber"].ToString());
+
+
+                                    SqlConnection1.Open();
+                                    adapter.InsertCommand = InsertCommand;
+                                    adapter.UpdateCommand = UpdateCommand;
+                                    if (Session["update"].ToString() == "false")
+                                    {
+                                        InsertCommand.ExecuteNonQuery();
+
+                                    }
+                                    else if(Session["update"].ToString() == "true")
+                                    {
+                                        UpdateCommand.ExecuteNonQuery();
+                                    }
+                                    SqlConnection1.Close();
 
                                 }
                                 catch (Exception p)
@@ -414,6 +657,7 @@ namespace QuizApp
                                 }
 
                                 EditTable(tableName);
+                                Response.Redirect("QuizSetup.aspx");
 
                             }
                         }

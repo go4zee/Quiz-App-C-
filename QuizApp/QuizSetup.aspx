@@ -6,16 +6,14 @@
     <title>Setup / Edit </title>
     <script type="text/javascript" src="scripts/jquery-2.2.3.min.js"></script>
     <script type="text/javascript">
+        //Validation without postback, setup function later once the system is working perfectly
         function btnAddQuestionToDB_ClientClick() {
             var txtQuestion = document.getElementById("<%= txtQuestion.ClientID %>").value;
-            if (value == "")
+            var k = 5;
+            if (txtQuestion != "")
                 return true;
-
-            return false;
+            return true;
         }
-        $(document).ready(function () {
-
-        });
 
 
 
@@ -103,7 +101,7 @@
                         </tr>
                         <tr>
                             <asp:Button ID="btnAddQuestionToDB" CssClass="btn btn-default" runat="server" OnClick="btnAddQuestionToDB_Click" OnClientClick="return btnAddQuestionToDB_ClientClick();" Text="Add" />
-                            <asp:Button ID="btnQuestionCancel" CssClass="btn btn-danger" runat="server" OnClick="btnQuestionCancel_Click" Text="Cancel" />
+                            <asp:Button ID="btnQuestionCancel" CssClass="btn btn-danger" runat="server" OnClick=" btnQuestionCancel_Click" Text="Cancel" />
                         </tr>
                     </table>
                 </div>

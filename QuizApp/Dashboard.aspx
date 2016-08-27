@@ -7,7 +7,9 @@
         function validateQuizName() {
             var quizNameTextBox = document.getElementById("<%= QuizNameTextBox.ClientID %>").value;
             if (quizNameTextBox)
+            {
                 return true;
+            }
 
             return false;
         }
@@ -37,6 +39,7 @@
                 <div class="modal-body">
                     <asp:Label runat="server" ID="QuizNameLabel">Name:</asp:Label>
                     <asp:TextBox ID="QuizNameTextBox" runat="server" placeholder="Enter Quiz Name"></asp:TextBox>
+                    <asp:Label runat="server" ID="Label1">Replace Spaces with Underscore</asp:Label>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
