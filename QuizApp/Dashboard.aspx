@@ -16,14 +16,12 @@
 </asp:Content>
 <asp:Content ID="Content3" ContentPlaceHolderID="contentBody" runat="server">
 
-    <div class="col-xs-12">
         <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
             Create New Quiz
         </button>
 
         <div class="list-group" id="QuizListDiv" runat="server">
         </div>
-    </div>
 
 
 
@@ -37,7 +35,7 @@
                     <h4 class="modal-title" id="myModalLabel">Create New Quiz</h4>
                 </div>
                 <div class="modal-body">
-                    <asp:Label ID="QuizNameLabel">Name:</asp:Label>
+                    <asp:Label runat="server" ID="QuizNameLabel">Name:</asp:Label>
                     <asp:TextBox ID="QuizNameTextBox" runat="server" placeholder="Enter Quiz Name"></asp:TextBox>
                 </div>
                 <div class="modal-footer">

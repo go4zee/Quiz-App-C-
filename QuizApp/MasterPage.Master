@@ -17,8 +17,13 @@
     </asp:ContentPlaceHolder>
 </head>
 <body>
+    <script type="text/javascript" src="scripts/jquery-2.2.3.min.js"></script>
+    <script src="scripts/bootstrap.min.js"></script>
+
     <div class="container-fluid">
         <form id="form1" runat="server">
+            <asp:ScriptManager ID="ScriptManager1" runat="server">
+            </asp:ScriptManager>
             <div class="wrapper">
                 <nav id="mainNavbar" class="navbar navbar-inverse">
                     <a class="navbar-brand" href="#">
@@ -41,6 +46,7 @@
 
                 <div class="content" runat="server">
                     <asp:ContentPlaceHolder ID="contentBody" runat="server">
+                        
 
                     </asp:ContentPlaceHolder>
                 </div>
@@ -72,13 +78,15 @@
         </form>
     </div>
 
-    <script type="text/javascript" src="scripts/jquery-2.2.3.min.js"></script>
-    <script src="scripts/bootstrap.min.js"></script>
-
     <script>
         $(document).ready(function () {
             var contentHeight = $(document).height() - $('#mainNavbar').height() - $('#footer-main').height();
             $('.content').height(contentHeight);
+
+            var height = $(".content").height()-$('#quizEditWindowTopContainer').height();
+            var windowheight = height-20;
+
+            $('#quizEditWindowContainer').height(windowheight);
 
             $(document).ready(function () {
                 var url = window.location.pathname;
@@ -94,5 +102,6 @@
 
         });
     </script>
+
 </body>
 </html>

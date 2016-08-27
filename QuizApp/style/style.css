@@ -4,7 +4,7 @@
     height: 40px;
 }
 
-.content{
+.container-fluid{
     background: #ffffff center center no-repeat;
     background-size: cover;
     opacity:1;
@@ -17,6 +17,7 @@
     background:#373A3C;
     color:#FFFFFF;
     font-family: Arial, Helvetica, sans-serif;
+    height: 90px;
 }
 
 .modal-backdrop {
@@ -32,6 +33,8 @@
 
 .navbar {
     z-index: 1040;
+    margin: 0px;
+    height: 52px;
 }
 
 .container-fluid {
@@ -48,4 +51,35 @@
 .badge{
     float: right;
     position: relative;
+
+}
+#quizListSideBar{
+    margin: 0 auto;
+    margin-top: 5px;
+    border-radius: 10px;
+    border: 1px solid grey;
+    float: left;
+    height: 99%;
+    position: relative;
+    padding: 0px 0px 0px 0px;
+}
+#quizEditWindowTopContainer{
+    margin: 0px 0px 20px 0px;
+    border-radius: 10px;
+    border: 1px solid grey;
+    padding: 0px 0px 0px 0px;
+}
+#questionWindow{
+    margin: 20px 0px 10px 0px;
+    border-radius: 10px;
+    padding: 0px 0px 0px 0px;
+}
+
+.list-group-item:hover{
+    background-color: lightgray;
+}
+
+.form-control.txt-Question{
+    margin: 5px;
+    width: 50%;
 }
