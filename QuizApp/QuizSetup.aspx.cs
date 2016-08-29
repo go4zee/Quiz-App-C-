@@ -175,8 +175,9 @@ namespace QuizApp
                         SqlConnection1.Open();
                         adapter.DeleteCommand = UpdateCommand;
 
+
                         UpdateCommand.ExecuteNonQuery();
-                        InitializeQuizSetup();
+                        Response.Redirect("QuizSetup.aspx");
                     }
                     catch(Exception error)
                     {

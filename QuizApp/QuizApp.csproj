@@ -121,6 +121,7 @@
     <Content Include="LICENSE.txt" />
     <Content Include="Login.aspx" />
     <Content Include="QuizSetup.aspx" />
+    <Content Include="Router.aspx" />
     <Content Include="scripts\ai.0.22.19-build00125.js" />
     <Content Include="scripts\ai.0.22.19-build00125.min.js" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -206,6 +207,13 @@
     </Compile>
     <Compile Include="QuizSetup.aspx.designer.cs">
       <DependentUpon>QuizSetup.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Router.aspx.cs">
+      <DependentUpon>Router.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Router.aspx.designer.cs">
+      <DependentUpon>Router.aspx</DependentUpon>
     </Compile>
     <Compile Include="testpage.aspx.cs">
       <DependentUpon>testpage.aspx</DependentUpon>

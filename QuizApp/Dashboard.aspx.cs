@@ -60,9 +60,20 @@ namespace QuizApp
                         DeleteButton.ServerClick += DeleteQuiz;
                         DeleteButton.Attributes["id"] = "deleteButton";
 
+                        HtmlButton SendToButton = new HtmlButton();
+                        SendToButton.InnerText = "Send To Email";
+                        SendToButton.Attributes["class"] = "btn btn-success";
+                        SendToButton.Attributes["value"] = SecurityClass.EncryptString(dr["QuizName"].ToString(), "TableNamePhrase");
+                        SendToButton.Attributes["action"] = SecurityClass.EncryptString("Delete", "ActionPhrase");
+                        SendToButton.Attributes["quizid"] = SecurityClass.EncryptString(dr["QuizID"].ToString(), "QuizID");
+                        SendToButton.Attributes["runat"] = "server";
+                        SendToButton.ServerClick += DeleteQuiz;
+                        SendToButton.Attributes["id"] = "sendToEmailButton";
+
                         QuizListDiv.Controls.Add(li);
                         li.Controls.Add(editButton);
                         li.Controls.Add(DeleteButton);
+                        li.Controls.Add(SendToButton);
                     }
                 }
             }
