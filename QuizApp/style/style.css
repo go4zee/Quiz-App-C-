@@ -87,3 +87,17 @@
 #sendToEmailButton{
     margin: 0px 0px 0px 5px;
 }
+
+.quizSetupListGroup{
+    margin: 0px;
+    overflow:hidden;
+}
+.quizSetupDiv{
+    margin: 0px 0px 0px 0px;
+    padding: 0px;
+}
+
+#quizSetupDeleteButton{
+    margin: 8px 0px 0px 0px;
+    padding:2px;
+}

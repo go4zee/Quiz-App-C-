@@ -79,6 +79,24 @@ namespace QuizApp
             }
         }
 
+        protected void ChooseAction(string Action, string TableName)
+        {
+            switch (Action)
+            {
+                case "Create":
+                    CreateTable(TableName); break;
+
+                case "Edit":
+                    EditTable(TableName); break;
+
+                case "Delete":
+                    DeleteTable(TableName); break;
+
+                default:
+                    Response.Redirect("Dashboard.aspx"); break;
+            }
+        }
+
         #region ADD, EDIT and DELETE Table
 
         /// <summary>
@@ -129,27 +147,30 @@ namespace QuizApp
                     {
                         LinkButton li = new LinkButton();
                         li.Text = dr["QuizTableQuizQuestion"].ToString();
-                        li.Attributes["class"] = "list-group-item";
+                        li.Attributes["class"] = "list-group-item quizSetupListGroup";
                         li.Attributes["qnumber"] = dr["QuizTableQuestionNumber"].ToString();
                         li.CommandArgument = dr["QuizTableQuestionNumber"].ToString();
                         li.Attributes["runat"] = "server";
                         li.Click += new System.EventHandler(QuizSideBarLinkButton_Click);
 
                         HtmlGenericControl questionDiv = new HtmlGenericControl("div");
-                        
-                        HtmlButton DeleteButton = new HtmlButton();
-                        DeleteButton.InnerText = "Delete";
-                        DeleteButton.Attributes["class"] = "btn btn-danger btn-xs";
-                        DeleteButton.Attributes["runat"] = "server";
-                        DeleteButton.ServerClick += DeleteQuestion;
-                        DeleteButton.Attributes["qnumber"] = dr["QuizTableQuestionNumber"].ToString();
-                        //li.Attributes["onclientclick"] = "LinkButton_Click()";
+                        questionDiv.Attributes["class"] = "col-xs-11 quizSetupDiv";
 
+                        HtmlGenericControl deleteButtonDiv = new HtmlGenericControl("div");
+                        deleteButtonDiv.Attributes["class"] = "col-xs-1 quizSetupDiv";
+
+                        LinkButton DeleteButton = new LinkButton();
+                        DeleteButton.Text = "Delete";
+                        DeleteButton.Attributes["class"] = "btn btn-danger";
+                        DeleteButton.Attributes["runat"] = "server";
+                        DeleteButton.Attributes["id"] = "quizSetupDeleteButton";
+                        DeleteButton.Attributes["qnumber"] = dr["QuizTableQuestionNumber"].ToString();
+                        DeleteButton.Click += new System.EventHandler(DeleteQuestion);
 
                         questionDiv.Controls.Add(li);
+                        deleteButtonDiv.Controls.Add(DeleteButton);
                         quizQuestionListBar.Controls.Add(questionDiv);
-                        questionDiv.Controls.Add(DeleteButton);
-                        
+                        quizQuestionListBar.Controls.Add(deleteButtonDiv);
                     }
                 }
             }
@@ -159,7 +180,7 @@ namespace QuizApp
 
         private void DeleteQuestion(object sender, EventArgs e)
         {
-            HtmlButton DeleteButton = (HtmlButton)sender;
+            LinkButton DeleteButton = (LinkButton)sender;
             
             if(DeleteButton.Attributes["qnumber"].ToString() != "")
             {
@@ -272,7 +293,7 @@ namespace QuizApp
                 txtanswer2.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer2");
                 txtanswer3.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer3");
                 txtanswer4.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer4");
-                txtanswer5.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer5");
+                 txtanswer5.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer5");
                 txtanswer6.Value = dataTable.Rows[0].Field<string>("QuizTableQuizAnswer6");
 
                 btnAddQuestionToDB.Text = "Update";
@@ -339,44 +360,22 @@ namespace QuizApp
                         {
                             AddHTMLElements(false, dataTable);
                             Session["qnumber"] = parameterTableRowID;
-
-
                         }
-
                     }
                     catch (Exception error)
                     {
                         string errorString = error.ToString();
                     }
                 }
-
             }
             else
             {
                 Response.Redirect("QuizSetup.aspx");
             }
-
-
         }
         #endregion
 
-        protected void ChooseAction(string Action, string TableName)
-        {
-            switch (Action)
-            {
-                case "Create":
-                    CreateTable(TableName); break;
 
-                case "Edit":
-                    EditTable(TableName); break;
-
-                case "Delete":
-                    DeleteTable(TableName); break;
-
-                default:
-                    Response.Redirect("Dashboard.aspx"); break;
-            }
-        }
 
         #region Query and Non-Query Execute
         public DataTable QueryExecute(string QueryString, string Connection)
@@ -482,6 +481,13 @@ namespace QuizApp
 
             Response.Redirect("QuizSetup.aspx");
         }
+
+        /// <summary>
+        /// Triggered when add or Update button on the quiz setup page.
+        /// Adds  a new question or edits the existing one by 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
 
         protected void btnAddQuestionToDB_Click(object sender, EventArgs e)
         {

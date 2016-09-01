@@ -9,7 +9,6 @@
         //Validation without postback, setup function later once the system is working perfectly
         function btnAddQuestionToDB_ClientClick() {
             var txtQuestion = document.getElementById("<%= txtQuestion.ClientID %>").value;
-            var k = 5;
             if (txtQuestion != "")
                 return true;
             return true;

@@ -67,7 +67,7 @@ namespace QuizApp
                         SendToButton.Attributes["action"] = SecurityClass.EncryptString("Delete", "ActionPhrase");
                         SendToButton.Attributes["quizid"] = SecurityClass.EncryptString(dr["QuizID"].ToString(), "QuizID");
                         SendToButton.Attributes["runat"] = "server";
-                        SendToButton.ServerClick += DeleteQuiz;
+                        SendToButton.ServerClick += SendToEmail;
                         SendToButton.Attributes["id"] = "sendToEmailButton";
 
                         QuizListDiv.Controls.Add(li);
@@ -81,6 +81,16 @@ namespace QuizApp
 
 
 
+        }
+
+        private void SendToEmail(object sender, EventArgs e)
+        {
+            HtmlButton button = (HtmlButton)sender;
+            string QuizID = Server.UrlEncode(MD5EncryptionHelper.Encrypt(SecurityClass.DecryptString(button.Attributes["quizid"], "QuizID")));
+            string QuizTableName =Server.UrlEncode( MD5EncryptionHelper.Encrypt(SecurityClass.DecryptString(button.Attributes["value"], "TableNamePhrase")));
+            string UserID = Server.UrlEncode(MD5EncryptionHelper.Encrypt(Session["UserID"].ToString())); 
+            string ResponseString = string.Format("TakeQuiz.aspx?QuizID={0}&QuizTableName={1}&UserID={2}",QuizID, QuizTableName,UserID);
+            Response.Redirect(ResponseString);
         }
 
         protected void CreateNewQuiz(object sender, EventArgs e)
