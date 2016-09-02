@@ -26,7 +26,7 @@ namespace QuizApp
 
         public static Dictionary<int, List<int>> AnswerList = new Dictionary<int, List<int>>();
 
-        //Holds all the answers the quiz taker gives/
+        //Holds all the answers the quiz taker gives in the app/
 
         DataTable dataTable;
 
